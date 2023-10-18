@@ -17,8 +17,8 @@ bot = telebot.TeleBot(token)
 #                                  login=booru_login, api_key=booru_api)
 
 # booru = DanbooruChecker(tags_path='tags_copy.json', login=booru_login, api_key=booru_api,
-#                         proxy_list_path='proxies.csv', banned_tag='male_focus')
-booru = DanbooruChecker(tags_path='tags.json', login=booru_login, api_key=booru_api,
+#                         proxy_list_path='data/proxies.csv', banned_tag='male_focus')
+booru = DanbooruChecker(tags_path='data/tags.json', login=booru_login, api_key=booru_api,
                         proxy_list_path=None, banned_tag='male_focus')
 
 
