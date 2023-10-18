@@ -50,7 +50,7 @@ To run this project, you will need to add the following environment variables to
   pip install -r requirements.txt
 ```
 
-- Add environment varibles
+- Add environment variables
 
 
 
@@ -67,7 +67,7 @@ To run this project, you will need to add the following environment variables to
 
 In [bot.py](bot.py) file need to find next line:
 ```
-  booru = DanbooruChecker(tags_path='tags.json', login=booru_login, api_key=booru_api, proxy_list_path=None, banned_tag='male_focus')
+  booru = DanbooruChecker(tags_path='data/tags.json', login=booru_login, api_key=booru_api, proxy_list_path=None, banned_tag='male_focus')
 ```
 Then specify the path to list of your proxy servers in .csv file.
 
