@@ -121,8 +121,11 @@ class DanbooruChecker:
         return unseen_posts
 
     def add_new_tag(self, new_tag):
-        with open(self.tags_path, 'r') as file:
-            tags = json.load(file)
+        try:
+            with open(self.tags_path, 'r') as file:
+                tags = json.load(file)
+        except ValueError:
+            tags = dict()
 
         if new_tag in tags.keys():
             return False, 'Tag already added'

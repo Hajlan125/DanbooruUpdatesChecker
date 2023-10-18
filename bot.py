@@ -34,10 +34,18 @@ def get_text_messages(message):
     # updates = booru.show_booru_tags_updates()
     try:
         updates = booru.get_updates()
-    except Exception as exc:
-        bot.send_message(message.chat.id, str(exc))
+    except ValueError:
+        bot.send_message(message.chat.id, 'No tags')
         return
+    except Exception as exc:
+        bot.send_message(message.chat.id, str(exc.__class__))
+        return
+
     print(updates)
+
+    if not updates:
+        bot.send_message(message.chat.id, 'No updates')
+        return
 
     for post_id, url in updates:
         if url:
