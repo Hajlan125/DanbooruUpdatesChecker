@@ -2,19 +2,23 @@ import csv
 import json
 import time
 import requests
+from requests.auth import HTTPBasicAuth
 
 
 class DanbooruChecker:
-    def __init__(self, tags_path, login, api_key, proxy_list_path=None, banned_tag=None):
-
+    def __init__(self, tags_path, login=None, api_key=None, proxy_list_path=None, banned_tag=None):
         try:
             with open(tags_path, 'r'):
                 self.tags_path = tags_path
         except FileNotFoundError:
             raise
 
+        if (login is None and api_key is not None) or (login is not None and api_key is None):
+            raise ValueError("Need login and api key or neither")
+
         self.login = login
         self.api_key = api_key
+
         self.banned_tag = banned_tag
         self.proxy_list_path = proxy_list_path
 
@@ -29,40 +33,45 @@ class DanbooruChecker:
         except Exception:
             raise
 
-    def post_list(self, tag, date=None, limit=25):
+    def post_list(self, tag: str, date: str = None, limit: int = 25) -> list:
+        """
+        Returns a list of json objects that store information about each danbooru post founded by specified tag and
+        created after specified date
+
+        :param tag: the tag by which the search will be performed
+        :param date: parameter for searching for a post later than the specified date
+        :param limit: how many posts will be stored in the returned list
+        :return: a list of json objects that contains post information
+        """
         if tag == ' ':
             tag = ''
 
-        edited_tag = (tag.replace('(', '%28')
-                      .replace(')', '%29')
-                      .replace(':', '%3A'))
         if self.banned_tag:
-            edited_tag += f'+-{self.banned_tag}'
+            tag += f' -{self.banned_tag}'
 
         if date:
-            edited_date = '+date%3A>' + date.replace('+03:00', '').replace(':', '%3A')[:-2] + '99'
-            # call = (
-            #     f'https://danbooru.donmai.us/posts.json?tags={edited_tag}+date%3A>{edited_date}&limit={limit}'
-            #     f'&login={self.login}&api_key={self.api_key}')
-        else:
-            edited_date = ''
+            edited_date = 'date:>' + date[:-8] + '99'
+            tag += f' {edited_date}'
 
-        call = (f'https://danbooru.donmai.us/posts.json?tags={edited_tag}{edited_date}&limit={limit}'
-                f'&login={self.login}&api_key={self.api_key}')
+        params = {
+            'tags': tag,
+            'limit': limit
+        }
 
-        posts = self.danbooru_request(call, proxy_path=self.proxy_list_path)
-        # print(posts)
-        # print(current_proxy['https'])
-        # print(call)
-
+        # call = (f'https://danbooru.donmai.us/posts.json?tags={edited_tag}{edited_date}&limit={limit}'
+        #         f'&login={self.login}&api_key={self.api_key}')
+        site = 'https://danbooru.donmai.us/posts.json'
+        posts = self.danbooru_request(site=site, proxy_path=self.proxy_list_path, params=params)
         return posts
 
-    def post_show(self, post_id):
-        call = f'https://danbooru.donmai.us/posts/{post_id}.json'
-        post = self.danbooru_request(call, self.proxy_list_path)
+    def post_show(self, post_id: int) -> dict:
+        site = f'https://danbooru.donmai.us/posts/{post_id}.json'
+
+        post = self.danbooru_request(site=site, proxy_path=self.proxy_list_path)
         return post
 
-    def danbooru_request(self, call, proxy_path):
+    def danbooru_request(self, site, proxy_path, params=None):
+        auth = HTTPBasicAuth(self.login, self.api_key) if self.login else None
         if proxy_path:
             for proxy in self.proxy_csv:
                 current_proxy = {
@@ -70,7 +79,7 @@ class DanbooruChecker:
                     'https': proxy[0]
                 }
                 try:
-                    response = requests.get(call, proxies=current_proxy)
+                    response = requests.get(site, params=params, proxies=current_proxy, auth=auth)
                     if not response.ok:
                         continue
                     break
@@ -81,7 +90,7 @@ class DanbooruChecker:
                 return []
         else:
             try:
-                response = requests.get(call)
+                response = requests.get(site, params=params, auth=auth)
                 if not response.ok:
                     return []
             except requests.exceptions.ConnectionError:
@@ -100,9 +109,11 @@ class DanbooruChecker:
         unseen_posts = []
         for tag, last_check in tags.items():
             updates = self.post_list(tag=tag, date=last_check)
-            print(f'<<{tag}>> -- {len(updates)} posts')
+
             if not updates:
                 continue
+
+            print(f'<<{tag}>> -- {len(updates)} posts')
 
             tags[tag] = max(updates, key=lambda x: int(x['id']))['created_at']
 
