@@ -16,7 +16,7 @@ bot = telebot.TeleBot(token)
 # proxy_booru = BooruApiProxyCalls(proxy_list_path='proxies.csv', tags_path='tags_copy.json',
 #                                  login=booru_login, api_key=booru_api)
 
-# booru = DanbooruChecker(tags_path='tags_copy.json', login=booru_login, api_key=booru_api,
+# booru = DanbooruChecker(tags_path='data/tags.json', login=booru_login, api_key=booru_api,
 #                         proxy_list_path='data/proxies.csv', banned_tag='male_focus')
 booru = DanbooruChecker(tags_path='data/tags.json', login=booru_login, api_key=booru_api,
                         proxy_list_path=None, banned_tag='male_focus')
@@ -49,13 +49,14 @@ def get_text_messages(message):
 
     for post_id, url in updates:
         if url:
+            upd = url+'\n'+f'https://danbooru.donmai.us/posts/{post_id}'
             if telegram_channel_id:
                 keyboard = telebot.types.InlineKeyboardMarkup()
                 btn = telebot.types.InlineKeyboardButton(text='Send to channel', callback_data=post_id)
                 keyboard.add(btn)
-                bot.send_message(message.chat.id, url, reply_markup=keyboard)
+                bot.send_message(message.chat.id, upd, reply_markup=keyboard)
             else:
-                bot.send_message(message.chat.id, url)
+                bot.send_message(message.chat.id, upd)
 
         time.sleep(0.2)
 
