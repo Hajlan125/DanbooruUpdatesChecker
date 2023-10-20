@@ -79,7 +79,7 @@ Like this you also can change the banned tag.
 ## Roadmap
 
 - [ ]  ~~Add banned tag changing function in telegram interface~~
-- [ ]  Speed up sing multithreading (?)
+- [ ]  Speed up using multithreading (?)
 - [ ]  Add code documentation
 - [ ]  Finish community version of bot
 
