@@ -34,7 +34,7 @@ class FastDanbooruChecker:
         tasks = []
         site = 'https://danbooru.donmai.us/posts.json'
         async with aiohttp.ClientSession() as session:
-            sem = asyncio.Semaphore(value=3)  # change if needed
+            sem = asyncio.Semaphore(value=5)  # change if needed
             for tag, last_check in tags.items():
                 tasks.append(self.danbooru_request(site=site, tag=tag, last_check=last_check,
                                                    session=session, limit=limit, tags_to_upd=upd_tags_dates,
@@ -58,7 +58,8 @@ class FastDanbooruChecker:
         return unseen_posts
 
     async def danbooru_request(self, tag: str, session: aiohttp.ClientSession, semaphore: asyncio.Semaphore,
-                               last_check: str = None, tags_to_upd: dict = None, limit: int = 50, site: str = None):
+                               last_check: str = None, tags_to_upd: dict = None, limit: int = 50, site: str = None,
+                               retries: int = 0):
         if not site:
             site = 'https://danbooru.donmai.us/posts.json'
 
@@ -81,15 +82,17 @@ class FastDanbooruChecker:
         }
 
         async with semaphore:
+            if retries == 3:
+                return []
+
             resp = await session.request(method='GET', url=site, params=params, auth=auth)
 
             if resp.ok:
                 data = await resp.json()
             else:
-                await asyncio.sleep(1)
                 data = self.danbooru_request(site=site, tag=tag, last_check=last_check,
                                              session=session, limit=limit,
-                                             semaphore=semaphore)
+                                             semaphore=semaphore, retries=retries+1)
 
         if tags_to_upd and data:
             tags_to_upd[tag] = max(data, key=lambda x: int(x['id']))['created_at']
