@@ -3,6 +3,8 @@ import copy
 import itertools
 import json
 import aiohttp
+import prettytable as pt
+from datetime import datetime
 
 
 class FastDanbooruChecker:
@@ -98,6 +100,8 @@ class FastDanbooruChecker:
                 tags = json.load(file)
         except ValueError:
             tags = dict()
+        except FileNotFoundError:
+            raise
 
         if new_tag in tags.keys():
             return False, 'Tag already added'
@@ -117,9 +121,12 @@ class FastDanbooruChecker:
         return True, 'Tag added successfully'
 
     @staticmethod
-    def delete_tag(tags_path, tag):
-        with open(tags_path, 'r') as file:
-            tags = json.load(file)
+    def delete_tag(tags_path, tag) -> (bool, str):
+        try:
+            with open(tags_path, 'r') as f:
+                tags = json.load(f)
+        except FileNotFoundError:
+            raise
 
         if not tags.pop(tag, None):
             return False, 'The tag has not been deleted, it may not be in the list'
@@ -138,10 +145,31 @@ class FastDanbooruChecker:
 
     @staticmethod
     def show_tag_list(tags_path):
-        with open(tags_path, 'r') as file:
-            tags = json.load(file)
+        try:
+            with open(tags_path, 'r') as f:
+                tags = json.load(f)
+        except FileNotFoundError:
+            raise
+        return sorted(list(tags.keys()))
 
-        return list(tags.keys())
+    @staticmethod
+    def show_tags_table(tags_path):
+        try:
+            with open(tags_path, 'r') as f:
+                tags: dict = json.load(f)
+        except FileNotFoundError:
+            raise
+
+        table = pt.PrettyTable(['Tag', 'Last check'])
+        table.align['Tag'] = 't'
+        table.align['Last check'] = 'l'
+
+        for tag, last_check in sorted(tags.items()):
+            lst = datetime.fromisoformat(last_check)
+
+            table.add_row([tag, f'{lst.hour}:{lst.minute} {lst.day}.{lst.month}.{lst.year}'])
+
+        return table
 
     @staticmethod
     def get_post_url_under_five_mb(danbooru_post_json: dict):

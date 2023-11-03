@@ -1,5 +1,6 @@
 from os import getenv
 
+from aiogram.enums import ParseMode
 from aiogram.types import BotCommand
 from dotenv import load_dotenv
 
@@ -85,10 +86,28 @@ async def start(message: types.Message, state: FSMContext):
     await state.clear()
 
 
+@dp.message(Command('list'))
+async def cmd_list(message: types.Message):
+    table = booru.show_tags_table(tags_path)
+    info = table.paginate(page_length=50, line_break=",").split(',')
+
+    for i in info:
+        await message.answer(f'<pre>{i}</pre>', parse_mode=ParseMode.HTML)
+
+
+@dp.message(Command('delete'))
+async def cmd_del(message: types.Message):
+    tag = message.text
+    status, msg = booru.delete_tag(tags_path=tags_path, tag=tag)
+    await message.answer(msg)
+
+
 async def main():
     bot_commands = [
         BotCommand(command="/start", description="Check for updates"),
-        BotCommand(command="/add", description="Add new tag")
+        BotCommand(command="/add", description="Add new tag"),
+        BotCommand(command="/delete", description="Delete tag"),
+        BotCommand(command="/list", description="List of your tags")
     ]
     await bot.set_my_commands(bot_commands)
     await dp.start_polling(bot)
