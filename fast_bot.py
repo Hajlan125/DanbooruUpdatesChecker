@@ -1,3 +1,4 @@
+import time
 from os import getenv
 
 from aiogram.enums import ParseMode
@@ -51,6 +52,8 @@ async def cmd_start(message: types.Message):
                 await message.answer(upd, reply_markup=builder.as_markup())
             else:
                 await message.answer(upd)
+
+            time.sleep(0.2)
 
         # time.sleep(0.2)
 
