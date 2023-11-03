@@ -4,8 +4,9 @@
 
 ## Overview
 
-This telegram bot checks the danbooru website and sends all new posts according to the tags specified by the user. All tags stored in json file
+This telegram bot checks the danbooru website and sends all new posts according to the tags specified by the user. All tags stored in json file.
 
+There are two versions of the bot: using TelegramBotApi and using aiogram
 
 ## Features
 
@@ -29,6 +30,7 @@ To run this project, you will need to add the following environment variables to
 
 `TELEGRAM_CHANNEL_ID` - "@example" like id of channel where the bot can send images. Leave it empty if this function is unnecessary
 
+`TAGS_PATH` - Path to json file with your tags
 
 ## Run Locally
 
@@ -57,13 +59,15 @@ To run this project, you will need to add the following environment variables to
 - Start the bot
 
 ```bash
-  python bot.py
+  python fast_bot.py
 ```
 
 
 ## FAQ
 
 ### -How enable proxy?
+
+Feature working only in [bot.py](bot.py)
 
 In [bot.py](bot.py) file need to find next line:
 ```
@@ -79,7 +83,8 @@ Like this you also can change the banned tag.
 ## Roadmap
 
 - [ ]  ~~Add banned tag changing function in telegram interface~~
-- [ ]  Speed up using multithreading (?)
+- [x]  Speed up using async
 - [ ]  Add code documentation
+- [ ]  Add unit tests
 - [ ]  Finish community version of bot
 
