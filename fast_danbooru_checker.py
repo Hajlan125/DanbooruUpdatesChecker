@@ -87,12 +87,12 @@ class FastDanbooruChecker:
 
             resp = await session.request(method='GET', url=site, params=params, auth=auth)
 
-            if resp.ok:
-                data = await resp.json()
+            if not resp.ok:
+                data = await self.danbooru_request(site=site, tag=tag, last_check=last_check,
+                                                   session=session, limit=limit,
+                                                   semaphore=semaphore, retries=retries + 1)
             else:
-                data = self.danbooru_request(site=site, tag=tag, last_check=last_check,
-                                             session=session, limit=limit,
-                                             semaphore=semaphore, retries=retries+1)
+                data = await resp.json()
 
         if tags_to_upd and data:
             tags_to_upd[tag] = max(data, key=lambda x: int(x['id']))['created_at']
