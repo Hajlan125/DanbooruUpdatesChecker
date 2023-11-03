@@ -34,7 +34,7 @@ class FastDanbooruChecker:
         tasks = []
         site = 'https://danbooru.donmai.us/posts.json'
         async with aiohttp.ClientSession() as session:
-            sem = asyncio.Semaphore(value=3)
+            sem = asyncio.Semaphore(value=3)  # change if needed
             for tag, last_check in tags.items():
                 tasks.append(self.danbooru_request(site=site, tag=tag, last_check=last_check,
                                                    session=session, limit=limit, tags_to_upd=upd_tags_dates,
@@ -69,7 +69,6 @@ class FastDanbooruChecker:
             edited_tag = ''
 
         if last_check:
-
             edited_date = 'date:>' + last_check[:-9] + '999'
             edited_tag += f' {edited_date}'
 
@@ -84,10 +83,13 @@ class FastDanbooruChecker:
         async with semaphore:
             resp = await session.request(method='GET', url=site, params=params, auth=auth)
 
-            if not resp.ok:
-                print(resp.status)
-
-            data = await resp.json()
+            if resp.ok:
+                data = await resp.json()
+            else:
+                await asyncio.sleep(1)
+                data = self.danbooru_request(site=site, tag=tag, last_check=last_check,
+                                             session=session, limit=limit,
+                                             semaphore=semaphore)
 
         if tags_to_upd and data:
             tags_to_upd[tag] = max(data, key=lambda x: int(x['id']))['created_at']

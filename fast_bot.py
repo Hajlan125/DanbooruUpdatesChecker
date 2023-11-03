@@ -45,7 +45,7 @@ async def cmd_start(message: types.Message):
             if telegram_channel_id:
                 builder = InlineKeyboardBuilder()
                 builder.add(types.InlineKeyboardButton(
-                    text="Нажми меня",
+                    text="Send",
                     callback_data=f"{post_id}")
                 )
                 await message.answer(upd, reply_markup=builder.as_markup())
