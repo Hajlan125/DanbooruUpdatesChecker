@@ -1,7 +1,7 @@
 from os import getenv
 
 from aiogram.enums import ParseMode
-from aiogram.types import BotCommand
+from aiogram.types import BotCommand, FSInputFile
 from dotenv import load_dotenv
 
 import asyncio
@@ -102,12 +102,19 @@ async def cmd_del(message: types.Message):
     await message.answer(msg)
 
 
+@dp.message(Command('json'))
+async def cmd_json(message: types.Message):
+    document = FSInputFile(tags_path)
+    await message.answer_document(document)
+
+
 async def main():
     bot_commands = [
         BotCommand(command="/start", description="Check for updates"),
         BotCommand(command="/add", description="Add new tag"),
         BotCommand(command="/delete", description="Delete tag"),
-        BotCommand(command="/list", description="List of your tags")
+        BotCommand(command="/list", description="List of your tags"),
+        BotCommand(command="/json", description="Receive json file of tags")
     ]
     await bot.set_my_commands(bot_commands)
     await dp.start_polling(bot)

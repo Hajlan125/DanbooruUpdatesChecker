@@ -34,7 +34,7 @@ class FastDanbooruChecker:
         tasks = []
         site = 'https://danbooru.donmai.us/posts.json'
         async with aiohttp.ClientSession() as session:
-            sem = asyncio.Semaphore(value=5)  # change if needed
+            sem = asyncio.Semaphore(value=10)  # change if needed
             for tag, last_check in tags.items():
                 tasks.append(self.danbooru_request(site=site, tag=tag, last_check=last_check,
                                                    session=session, limit=limit, tags_to_upd=upd_tags_dates,
